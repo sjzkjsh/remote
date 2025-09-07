@@ -1,0 +1,548 @@
+﻿day001：
+springboot day 001：
+1):
+<!--    所有springboot项目都必须继承-->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.0.5</version>
+    </parent>
+    <dependencies>
+2):
+<!--        web开发启动器-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+    </dependencies>
+3):
+<!--Springboot的打包插件-->
+    <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                </plugin>
+            </plugins>
+    </build>
+4):
+修改配置文件可以在application.properties中修改
+application.properties可以自己创建，也可以在src/main/resources中创建
+5):
+每个springboot项目都必须有一个main方法，需要有一个main方法来启动项目必须有@SpringBootApplication注解
+@SpringBootApplication//主配置类，说明这是一个SpringBoot应用
+public class testspringboot001 {
+    public static void main(String[] args) {
+        SpringApplication.run(testspringboot001.class, args);
+    }
+}
+6):
+在其他类中使用@RestController注解，就可以直接返回字符串，不需要使用@ResponseBody注解，
+@RestController注解相当于@ResponseBody 与 @Controller合在一起。
+//@ResponseBody//返回的是字符串，不是页面，返回jason数据
+7):
+Springboot的所有可编写的配置都在
+https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html#appendix.application-properties
+
+8）：
+通过快捷方式创建的springboot项目（day001-002）
+静态资源放在static文件夹中
+一些页面放在templates文件夹中
+修改配置文件可以在application.properties中修改
+
+9):
+//@SpringBootApplication由@SpringBootConfiguration、@EnableAutoConfiguration、@ComponentScan组成
+
+
+//@SpringBootConfiguration：是 Spring Boot 中的注解，它的本质上是一个组合注解，
+// 由@Configuration、@EnableAutoConfiguration和@ComponentScan组成。
+// 这意味着使用@SpringBootConfiguration标注的类，既具备配置类的功能（因为包含了@Configuration），
+// 又开启了 Spring Boot 的自动配置功能（@EnableAutoConfiguration），
+// 还能扫描指定包及其子包下的组件（@ComponentScan，如果不指定扫描范围，默认扫描标注该注解的类所在包及其子包 ）。
+
+//@EnableAutoConfiguration：是SpringBoot中开启自动配置的核心
+//是由@Import({AutoConfigurationImportSelector.class})提供功能：批量给容器导入组件
+//springboot会默认加载142个组件，来自spring-boot-autoconfigure包下的META-INF中指定的所有组件XXXAutoConfiguration
+//XXXAutoConfiguration为自动配置类,每个自动配置类可能都有@EnableAutoConfigurationproperties注解，
+//@EnableAutoConfigurationproperties(xxx.class)注解用来将配置文件中以xxx为前缀的属性封装到xxxproperties属性类中，
+
+
+10）：
+@Configuration//代替spring中的bean.xml文件
+public class TestUser_config {
+
+    @Bean//代替spring中的bean标签，代替set，属性注入
+    public user user(){
+        var user = new user();
+        user.setName("zhangsan");
+        user.setAge(18);
+        return user;
+    }
+}
+
+11):
+@EnableConfigurationProperties(Sheep.class)//
+//开启配置文件属性自动封装功能，默认从全局配置文件中获取属性,
+// 导入第三方的配置类，springboot默认只扫描主程序文件中的包，需要导入第三方的配置类，才能扫描到第三方的包
+//就算使用@Commponent以及@Configuration注解也无法扫描到第三方的包，需要使用EnableConfigurationProperties注解来开启配置文件属性自动封装功能
+//@EnableConfigurationProperties相当于import和configuration的结合体，同时可以导入第三方的配置类
+
+//@ConfigurationProperties(prefix = "Sheep")//配置文件中属性前缀为Sheep的属性会自动封装到Sheep对象中,
+// 获取以Sheep为前缀的属性在类上使用，会将类中的属性封装到配置文件中
+
+
+//@Import(user.class)//给容器导入指定组件，导入的组件默认是单实例的
+
+
+12):
+.yml配置文件细节
+|  表示大文本|下面是啥控制台打印的就是啥，会自动换行
+>表示小文本并不会换行
+---表示分割文档
+
+
+Day002：
+1):自动配置原理：
+引入依赖
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+每一个springboot项目都必须有一个main方法，需要有一个main方法来启动项目必须有@SpringBootApplication注解
+在SpringBootApplication注解中,有三个注解,其中有一个@EnableAutoConfiguration注解,这个注解的作用是开启自动配置
+@EnableAutoConfiguration注解的作用是开启自动配置,
+自动配置的原理是通过@Import注解导入AutoConfigurationImportSelector类,
+在AutoConfigurationImportSelector类中,有一个selectImports方法，引入了getAutoConfigurationEntry方法，
+在getAutoConfigurationEntry方法中,有getCandidateConfigurations方法，这个方法的作用是获取所有的自动配置类
+
+2):最佳实践的三种方式：
+1.直接在pom.xml文件中引入依赖，全自动配置，不需要配置任何东西
+2.手自一体  @Configuration + 配置WebMvcConfigurer +配置WebMvcRegistrations 不要标注@EnableWebMvc自动配置效果手动设置部分功能定义MVC底层组件
+3.纯手工配置  @Configuration + 配置WebMvcConfigurer +配置WebMvcRegistrations 标注@EnableWebMvc自动配置效果手动设置部分功能
+
+WebMvcConfigurer接口的作用是配置MVC底层组件，WebMvcRegistrations接口的作用是配置MVC底层组件的注册器
+WebMvcConfigurer接口实现了MVC所有组件功能
+
+为什么实现了WebMvcConfigurer接口，MVC底层组件就生效了？
+因为WebMvcAutoConfiguration类实现了WebMvcConfigurer接口，
+在内部类中EnableWebMvcAutoConfiguration继承了delegatingWebMvcConfiguration类，
+在delegatingWebMvcConfiguration类中，有一个方法setConfigurers，自动注入可以把所有Mvc组件全部拿来
+WebMvcConfigurer中的方法都会被delegatingWebMvcConfiguration类中的方法调用，所以我们写的底层方法调用时会被调用
+
+
+WebMvcAutoConfiguration类的作用是自动配置MVC底层组件:这是生效条件
+@AutoConfiguration(
+    after = {
+    DispatcherServletAutoConfiguration.class,  前端控制器自动配置
+    TaskExecutionAutoConfiguration.class,      任务执行自动配置
+    ValidationAutoConfiguration.class}          验证自动配置
+)
+@ConditionalOnWebApplication(    web应用才生效
+    type = Type.SERVLET
+)
+@ConditionalOnClass({Servlet.class, DispatcherServlet.class, WebMvcConfigurer.class})     必须有Servlet、DispatcherServlet、WebMvcConfigurer这三个类才生效
+@ConditionalOnMissingBean({WebMvcConfigurationSupport.class})   没有WebMvcConfigurationSupport这个类才生效
+@AutoConfigureOrder(-2147483638)      自动配置的顺序，越小越优先
+@ImportRuntimeHints({WebResourcesRuntimeHints.class})      导入运行时提示
+
+
+在WebMvcAutoConfiguration类中：
+放了两个filter(HiddenHttpMethodFilter(springmvc中的过滤器，页面表单可以以提供rest请求(restful风格)))
+实现post，get，put，delete请求的方式的互相转换
+
+内部类WebMvcAutoConfigurationAdapter实现了WebMvcConfigurer接口，WebMvcConfigurer接口的作用是配置MVC底层组件
+
+
+
+
+静态资源规则在addResourceHandlers方法中配置
+
+
+内部类EnableWebMvcConfiguration继承了DelegatingWebMvcConfiguration类，并且实现了Resource接口，
+DelegatingWebMvcConfiguration类的作用是代理WebMvcConfigurationSupport类，
+WebMvcConfigurationSupport是判断系统是否有相应的类，如果有就加入相应的HttpMessageConverters转换器，
+
+Resource接口的作用是配置静态资源规则，可以在properties文件中配置静态资源规则，
+
+
+3):静态资源规则
+1.默认的静态资源路径是：classpath是指在类路径下，比如resources文件夹下，java文件夹下
+1.classpath:/META-INF/resources/,
+2.classpath:/resources/,
+3.classpath:/static/,
+4.classpath:/public/
+
+4):欢迎页规则
+在WebMvcAutoConfiguration中进行定义
+在静态资源目录下，创建index.html，访问根路径时，会自动跳转到index.html页面
+如果没有就在templates文件夹下找html模板
+
+5):自定义配置文件
+在像自定义的类中找到@ConfigurationProperties注解，找到注解中的prefix属性，这个属性就是配置文件中的前缀，
+可以在配置文件中自己定义配置文件
+
+
+6):
+#spring.mvc.pathmatch.matching-strategy=ant_path_matcher  老板ant风格的路径匹配器，默认是path_pattern_parser
+#spring.mvc.pathmatch.matching-strategy=path_pattern_parser  新版path风格的路径匹配器，默认是ant_path_matcher
+#新版**只能用在末尾，ant风格可以用在任意位置
+
+
+7):springboot多端内容协商
+1.基于请求头的内容协商（默认开启）
+客户端向服务端发送请求，携带HTTP标准的Accept请求头:Accept: application/json、text/xml、text/yaml
+服务端根据客户端请求头期望的数据类型进行动态返回
+
+2.基于参数的内容协商（需要自己开启）
+#开启基于请求参数的内容协商功能。默认参数名format
+spring.mvc.contentnegotiation.favor-parameter=true
+spring.mvc.contentnegotiation,parameter-name=format  //设置参数名，默认为format
+
+
+8):内容协商原理：
+HttpMessageConverter接口的原理
+1.编写WebMvcConfigurer接口的实现类，重写configureMessageConverters方法，
+
+要明白RestController注解有什么作用，RestController注解相当于@ResponseBody 与 @Controller合在一起。
+而ResponseBody注解的作用是将方法的返回值作为响应体返回给客户端，responsebody注解有HttpMessageConverter处理
+
+
+
+
+9):自定义增加协商器
+<!--        支持返回xml格式数据-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+        </dependency>
+2.还要写一个实现类需要在类上写@JacksonXmlRootElement注解，这个注解的作用是将类作为xml的根元素返回给客户端
+
+
+10):自定义增加协商器
+
+
+
+
+Day3
+
+1):Thymeleaf的使用
+1.在pom.xml文件中引入依赖
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+2.在controller中返回一个字符串，字符串的内容是一个html页面的名称，thymeleaf会自动去templates文件夹中找html页面
+
+3.在html页面中使用th:text="${user.name}"来获取user对象中的name属性
+
+<!--th：标签加在任意属性前面就可以用动态属性${}替代, th:attr="属性名=‘${}’"可以批量添加属性
+    th:attr="属性名=‘${}’"  表示属性名的值是${}的值
+    th:attr="text="${}",utext="${}" "-->
+
+<!--这里的th：text=“”作用是hello，word会被标签体内的内容所取代
+    th:text就是替换标签体的内容-->
+<h1 th:text="${msg}">hello,word</h1>
+
+<!--th:untext也是替换标签体的内容但是如果标签体的内容是html语句他会根据语句显示标签体的内容
+    th：text标签是标签体的内容是什么就显示什么-->
+<hi th:utext="${msg}">hello,word</hi><br>
+
+<!--th:if时表示如果为true则显示图片false不显示
+    -->
+${}是动态属性，会根据${}的值来显示图片，若根路径改变了图片会改变，不安全
+@{}是根据根路径显示图片，非常安全，若根路径改变了图片也不会改变，@{}专门用来取路径
+还可以@{${}}组合使用，取路径后再取图片，这样就可以动态取路径了，非常安全
+
+<img th:src="${}" alt="" th:if="${}">
+<!--字符串拼接  符号|  |-->
+<h1 th:text="|前缀:${name}后缀|">hello,word</h1>
+
+
+
+遍历集合：
+<!--    th:each是循环遍历,person是自己起的名字 ${}是后端传输的动态标签-->
+    <tr th:each="person:${list}">
+<!--        th:object="${person}"-->
+<!--        ${person.firstname}==*{firstname}-->
+        <td th:text="${person.name}"></td>
+        <td th:text="${person.age}"></td>
+    </tr>
+
+
+相同的页面可以通过引入片段符来实现复用：
+<!--commen是你的公共的html名字让thymeleaf能通过加前缀后缀能找到你的html
+    header是你在公共的html里面起的名-->
+<!-- ~{}是引入片段符 -->
+<div th:replace="~{commen :: header}"></div>
+<!--上面的作用是可以让导航栏一直存在-->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+        </dependency>
+        热启动依赖，修改页面的时候可以摁下ctrl+9重新编译可直接在浏览器上书信出自己修改后的页面
+
+
+2):异常处理
+1.//表示处理所有异常
+    //@ExceptionHandler可以处理这个类的所有异常
+
+    @ExceptionHandler(Exception.class)
+    @ResponseBody
+    public String handleException(Exception e) {
+
+        return "error 原因:"+e.getMessage();
+//        Exception e是捕获到的异常对象，通过e.getMessage()可以获取异常的具体信息。
+    }
+2.@ControllerAdvice注解放到类上表示这个类是一个异常处理器
+
+
+3.底层中发生错误后会自动跳转到/error页面，springboot在底层中写好了一个BasicErrorController类，专门处理这个页面
+BasicErrorController类的作用是处理/error页面，里面有两个方法，分别可以返回html和jason信息
+3.1）解析一个错误页
+a.如果发生了500、404、503、403这些错误
+    i.如果有模板引擎，默认在 classpath:/templates/error/精确码.html
+    ii.如果没有模板引擎，在静态资源文件夹下找 精确码.html
+b.如果匹配不到 精确码.html 这些精确的错误页，就去找 5xx.html，4xx.html 模糊
+    i.如果有模板引擎，默认在 classpath:/templates/error/5xx.html
+    ii，如果没有模板引擎，在静态资源文件夹下找5xx.html2.如果模板引擎路径 templates下有 error.html 页面，就直接渲染
+c.如果都没有则就返回/error页面，这个页面是由BasicErrorController类来处理的
+
+4.异常处理的最佳实战
+a.前后端分离:
+    使用@ControllerAdvice+@ExceptionHandler(异常的形式)注解来处理异常
+b.服务端渲染
+    在resources/templates/目录下创建个error包在里面创建处理异常的html（精确匹配500.html,404html,模糊匹配：5xx.html,4xx.html）
+    发生业务错误
+        每一种错误都应该由代码控制比如（try{}catch{}）来跳转到属于自己异常页面
+        所有的错误信息都在model中
+
+3):servlet容器
+自动配置类是servletWebserverFactoryAutoConfiguration类，这个类的作用是自动配置servlet容器
+servletWebserverFactoryAutoConfiguration自动配置了嵌入式容器场景
+而且还绑定了ServerProperties配置类，所有的服务器配置都在ServerProperties配置类中，修改配置都以server开头
+servletWebserverFactoryAutoConfiguration在@import{}中导入了嵌入式的三大服务器:tomcat、jetty、undertow
+这三个都给容器导入了一个XXXservletFactory，web服务器工厂（专门来造服务器的）
+每一个工厂都有一个getWebServer方法，这个方法的作用是获取web服务器，
+e.TomcatServletWebServerFactory 创建了tomcat.
+4.ServletWebServerFactory 什么时候会创建 webServer出来
+ServletWebServerApplicationContexi ioc容器，启动的时候会调用创建web服务器
+6.Spring容器刷新的时候，
+会预留一个时机，刷新子容器。onRefresh()
+refresh()刷新容器会调用onRefresh()方法，onRefresh()方法会调用getWebServer()方法，
+
+总结:Web场景的Spring容器启动，在onRefresh的时候，会调用创建web服务器的方法。
+Web服务器的创建是通过WebServerFactory搞定的。
+容器中又会根据到了什么包条件注解，启动相关的 服务器配置
+，默认 EmbeddedTomcat 会给容器中放一个 TomcatServletwebServerFactory，导致项目启动，自动创建出Tomcat。
+
+最佳实战：
+用法:
+     修改 server 下的相关配置就可以修改服务器参数
+     注通过给容器中放一个 ServletWebServerFactory来禁用掉SpringBoot默认放的服务器工厂，实现自定香义嵌入任意服务器
+
+4):新特性ProblemDetail
+在WebMvcAutoConfiguration中，有一个方法ProblemDetailsErrorHandlingConfiguration（默认是关闭的），只能处理特定的异常
+    @Configuration(proxyBeanMethods = false)
+	@ConditionalOnProperty(prefix = "spring.mvc.problemdetails", name = "enabled", havingValue = "true")
+	static class ProblemDetailsErrorHandlingConfiguration {
+	}
+
+5):函数特性：请看day003_03_thymeleaf的笔记
+
+
+6):整合Mybatis
+第一步在配置文件properties中配置数据库的连接信息
+#配置数据库
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.type=com.zaxxer.hikari.HikariDataSource
+spring.datasource.url=jdbc:mysql://localhost:3306/powernode
+spring.datasource.username=root
+spring.datasource.password=123456
+
+之后根据MyBaties格式要求创建Mapper接口（写SQL连接函数）以及Mapper.xml文件（写SQL语句）
+其中xml文件中注意的地方  namespace属性的值是Mapper接口的全类名，id属性的值是Mapper接口中的方法名可以自动配置
+<mapper namespace="com.example.boot303_ssm.mapper.carMapper">
+    <select id="GetcarById">
+        select * from t_car where id=#{id}
+    </select>
+</mapper>
+
+还要在主程序入口写上@MapperScan()这个注释是用来扫描Mapper接口的还要在properties文件中配置MyBatis的配置文件的路径
+mybatis.mapper-locations=classpath:mybatis/mapper/*.xml告诉springboot去mybatis/mapper文件夹中找Mapper.xml文件
+
+
+Day4:
+1）：Springboot的基本特性
+
+  1.SpringApplication
+    1.1：SpringApplication是Spring Boot的核心类，它负责启动Spring Boot应用程序。
+    三种启动方式：
+         1.SpringApplication.run(DemoApplication.class, args);
+
+            //下面是上面的底层实现，自定义springApplication的底层设置
+         2.SpringApplication application = new SpringApplication(DemoApplication.class);
+            //也可以根据application来配置一些参数，但是在配置文件的配置优先级高于代码的配置（现在的配置）
+    //        application.setBanner();等等
+            application.run(args);
+
+            //还可以通过流式方法来配置
+         3.new SpringApplicationBuilder()
+                    .main(DemoApplication.class)
+                    .run(args);
+  2.Profile
+    2.1:标识环境：指定组件，配置在哪个环境生效
+        第一步：区分环境：可以在POJO类上添加@Profile("dev")注解，指定组件在dev环境下生效（有默认环境default）
+               也可以在Configuration类上添加@Profile("dev")注解，指定配置类在dev环境下生效
+        第二步：激活指定的环境：在application.properties中添加spring.profiles.active=dev来激活dev环境
+        第三步：切换环境：在application.properties中添加spring.profiles.active=test来切换到test环境
+    生效的环境=包含环境+激活环境
+    我们要把基础的配置放到包含环境中
+    把动态的配置放到激活环境中
+    2.2：自己定义不同环境的配置文件要根据规范：application-{}.properties（不能在自己编写的配置文件中写激活环境）
+        例如：application-dev.properties，application-test.properties
+    application.properties为主动配置文件，在里面的配置都会被加载
+    application-dev.properties为dev环境的配置文件，在里面的配置只会在dev环境下生效
+    application-test.properties为test环境的配置文件，在里面的配置只会在test环境下生效
+
+    但是效果=生效的配置文件+主配置文件（与生效的配置文件不冲突的生效）
+
+  3.配置文件优先级
+  命令行最大，由外到内的优先
+
+  4.@SpringBootTest+@Test
+  这是一个测试注解，它的作用是告诉Spring Boot这是一个测试类，Spring Boot会自动加载测试环境的配置文件，
+  必须在主程序下包或者主程序的子包下才能使用
+    4.1：@BeforeEach,@BeforeAll
+    这两个注解的作用是：1在每个测试方法之前执行，2.在所有测试方法之前执行
+
+
+  5.核心原理
+    5.1：事件监听机制
+       1：想要监听springboot启动的生命周期，需要实现SpringApplicationRunListener接口
+       Listener先要从 META-INF/spring.factorles 读到不
+       1、引导:利用 Bootstrapcontext 引导整个项目启动大
+
+       starting:应用开始，SpringApplication的run方法一调用，只要有了 Bootstrapcontext 就执行
+       environmentPrepared:环境准备好(把启动参数等绑定到环境变量中)，但是ioc还没有创建;【调一次】
+       *2、启动:
+        contextPrepared:ioc容器创建并准备好，但是sources(主配置类)没加载。并关闭引导上下文;组件都没创建【调一次】
+        contextloaded:ioc容器加载。主配置类加载进去了。但是ioc容器还没刷新(我们的bean没创建)。
+       =======截止以前，i0c容器里面还没造bean呢=======
+
+
+       started: ioc容器刷新了(所有bean造好了)，但是runner没调用
+       ready: ioc容器刷新了(所有bean造好了)，所有runner调用完了，
+       *3、运行 以前步骤都正确执行，代表容器running。
+
+       BootstrapRegistryInitializr:初始化引导注册器,只能感知特定的阶段感知引导初始化
+        ：MATA/spring.factorles 配置文件，创建引导上下文bootstrapcontext的时候触发
+        ：应用场景：进行密钥校对授权
+
+    5.2；自定义监听机制：在boot3-04里面有案例
+         创建一个event包，里面打包事件，其中有一个提交事件的类要继承ApplicationEventPublisherAware接口
+         并且实现里面的setApplicationEventPublisher方法，这个方法的作用是设置事件发布器
+         @Override//利用Springboot的监听器，来监听事件，系统会自动调用这个方法，会把真正发事件的底层组件注入进来
+             public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+                 this.applicationEventPublisher = applicationEventPublisher;
+             }
+         在这个类中也要实现一个调用底层API的方法，以便在Controller控制器中调用这个方法来实现事件监听
+             public void sendEvent(LoginSuccessEvent event){
+                 //调用底层API，来发布事件
+                 applicationEventPublisher.publishEvent(event);
+             }
+         在Controller控制器中调用sendEvent方法来实现事件监听
+                    //准备登陆成功事件
+                     LoginSuccessEvent event = new LoginSuccessEvent(new user("zhangsan", "123456"));
+                     //提交事件，让springboot的事件发布器发布事件
+                     eventpublisher.sendEvent(event);
+
+    5.3：自动配置SPI
+        1.入门理解：场景（做什么，要实现什么功能），配置，组件
+            1.1：做法：
+                    1.导入相对应场景的starter，在starter中有autoconfiguration自动配置类
+
+                    2.springboot会自动导入这些自动配置类，但所有的自动配置类并不一定全部都起作用，这依赖于生效条件
+
+                    3.这些自动配置类目的就只有一个就是给springboot配置组件
+                    组件绑定到属性类（xxxproperties.class），属性类又绑定到配置文件
+                    组件的所有底层就可以用配置文件修改
+        功能开关（@Enablexxxx）注解
+        就是开启xxxx功能的注
+        解底层都是利用@import注解导入了一个xxxAutoConfiguration类，这个类的作用是自动配置组件
+
+
+        2.进阶理解：
+        SpringBootApplication是由三个注解组成
+            @SpringBootConfiguration
+            @EnableAutoConfiguration
+            @ComponentScan(
+                excludeFilters = {@Filter(
+                type = FilterType.CUSTOM,
+                classes = {TypeExcludeFilter.class}
+            )
+            2.1：SpringBootConfiguration其实就是@Configuration注解，
+
+                 @EnableAutoConfiguration开启自动配置类他又两个注解：
+                    @AutoConfigurationPackage扫描主程序的包
+                    @Import({AutoConfigurationImportSelector.class})给容器批量注册组件
+
+                 @ComponentScan(
+                                 excludeFilters = {@Filter(
+                                 type = FilterType.CUSTOM,
+                                 classes = {TypeExcludeFilter.class}
+                             )包扫描
+                 在springboot启动的时候SpringBootApplication会自动扫描主程序的包和子包，
+                 怎么扫描的呢
+                 启动后在监听机制中，会执行started方法中，而这个方法（看截图）
+        3.自定义starter（就是自己在配置文件中写前缀的时候有提示之类的）
+            1.创建一个starter包，里面有一个自动配置类，这个自动配置类的作用是自动配置组件
+                        <dependency>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                            <optional>true</optional>
+                        </dependency>
+            2.将所有共同拥有的东西抽取出来，放到一个公共的starter中（就是创建一个新的模块，放到里面），这个starter的作用是自动配置组件
+            3.将这个starter放到你需要这个starter的pom.xml中导入依赖，同时要注意springboot扫描规则（只扫主程序下的包及其子包）
+            4.可以将公共的starter的所有业务全部用Import({xxx.class})导入到一个类中
+            5.再在主程序中用Import({xxx.class})导入这个类，这样就可以实现自定义starter了
+            6.还可以在新的stater中创建一个新注解利用@Enablexxxx注解来开启这个starter的功能，官方Enable怎么写你就怎么写只不过Import不一样（例子在左边）
+            7.还有一种就是将你第5步骤写的自动配置类包名写在resource文件中路径为：META-INF/spring/下，这样就可以在idea中看到这个starter的提示了
+
+    核心原理重点（需掌握）：
+    WebMvcAutoConfiguration原理、生效条件、效果、WebMvcConfigurer接口、静态资源规则EnableWebMvcConfiguration源码
+    为什么容器中放一个WebMvcConfigurer就能配置底层行为、WebMvcConfigurationSupport、三种模式（全自动，手自一体，全手动）
+    profiles场景隔离、生命周期机制，自动配置原理
+
+第二部分：
+
+      @Autowired
+        StringRedisTemplate redisTemplate;
+    //如果要操作redis直接注入StringRedisTemplate即可
+
+        @RequestMapping("/hello")
+        public String hello() {
+            //表示每访问和hello方法，hello的次数就会加1
+
+            //redis的常见的五大数据类型
+            //String、List、Set、Hash、ZSet
+            //操作String
+            //redisTemplate.opsForValue();
+            //操作List
+            //redisTemplate.opsForList();
+            //操作Set
+            //redisTemplate.opsForSet();
+            //操作Hash
+            //redisTemplate.opsForHash();
+            //操作ZSet
+            //redisTemplate.opsForZSet();
+
+      @Tag注解
+        标注在controller类上，用于描述controller的功能
+        @Tag(name = "用户管理",description = "用户管理相关接口")
+      @Operation注解
+        标注在controller方法上，用于描述controller方法的功能
+        @Operation(summary = "查询用户",description = "根据id查询用户")
+      @Parameter注解
+        标注在controller方法的参数上，用于描述controller方法的参数
+        @Parameter(name = "id",description = "用户id",required = true)

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>hello,word：<span th:test="${msg}"></span></h1>
+
+
+<!--th：标签加在任意属性前面就可以用动态属性${}替代, th:attr="属性名=‘${}’"可以批量添加属性
+    th:attr="属性名=‘${}’"  表示属性名的值是${}的值
+    th:attr="text="${}",utext="${}" "-->
+
+<!--这里的th：text=“”作用是hello，word会被标签体内的内容所取代
+    th:text就是替换标签体的内容-->
+<h1 th:text="${msg}">hello,word</h1>
+
+<!--th:untext也是替换标签体的内容但是如果标签体的内容是html语句他会根据语句显示标签体的内容
+    th：text标签是标签体的内容是什么就显示什么-->
+<hi th:utext="${msg}">hello,word</hi><br>
+
+<!--th:if时表示如果为true则显示图片false不显示
+    -->
+${}是动态属性，会根据${}的值来显示图片，若根路径改变了图片会改变，不安全
+@{}是根据根路径显示图片，非常安全，若根路径改变了图片也不会改变，@{}专门用来取路径
+还可以@{${}}组合使用，取路径后再取图片，这样就可以动态取路径了，非常安全
+
+<img th:src="${}" alt="" th:if="${}">
+<!--字符串拼接  符号|  |-->
+<h1 th:text="|前缀:${name}后缀|">hello,word</h1>
+
+
+<br>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!--commen是你的公共的html名字让thymeleaf能通过加前缀后缀能找到你的html
+    header是你在公共的html里面起的名-->
+<!-- ~{}是引入片段符 -->
+<div th:replace="~{commen :: header}"></div>
+<!--上面的作用是可以让导航栏一直存在-->
+<!--<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+        </dependency>
+        热启动依赖，修改页面的时候可以摁下ctrl+9重新编译可直接在浏览器上书信出自己修改后的页面-->
+<table>
+    <thead>
+    <tr>
+        <th>姓名</th>
+        <th>年龄</th>
+    </tr>
+    </thead>
+    <tbody>
+<!--    th:each是循环遍历,person是自己起的名字 ${}是后端传输的动态标签-->
+    <tr th:each="person:${list}">
+<!--        th:object="${person}"-->
+<!--        ${person.firstname}==*{firstname}-->
+        <td th:text="${person.name}"></td>
+        <td th:text="${person.age}"></td>
+    </tr>
+    </tbody>
+
+</table>
+</body>
+</html>
